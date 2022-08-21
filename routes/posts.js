@@ -31,6 +31,7 @@ router.get("/", async (req, res) => {
 
     res.status(200).json({
         result: posts.map((post) => ({
+            postId : post.postId,
             title: post.title,
             category: post.category,
             description: post.description,
@@ -48,6 +49,7 @@ router.get("/serch/:category", async (req, res) => {
     const posts = await Post.findAll({ where: { category } })
     res.status(200).json({
         result: posts.map((post) => ({
+            postId : post.postId,
             title: post.title,
             category: post.category,
             description: post.description,
@@ -77,6 +79,7 @@ router.get("/:postId", async (req, res) => {
         } else {
             res.status(200).json({
                 result: {
+                    postId : post.postId,
                     title: post.title,
                     category: post.category,
                     description: post.description,

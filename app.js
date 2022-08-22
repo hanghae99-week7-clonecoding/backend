@@ -7,15 +7,14 @@ const cookieParser = require("cookie-parser");
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
-app.use("/", Router);
 
-app.use(
-  cors({
+
+app.use(cors({
   origin: true,
-  credentials: true,
-  })
-  );
+  credentials: true
+  }));
   
+app.use("/", Router);  
   
 app.get("/", (req, res) => {
     res.status(200).json({ message :"메인화면" })

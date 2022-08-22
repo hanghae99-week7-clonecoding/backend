@@ -9,7 +9,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use("/", Router);
 
-app.use(cors('*'));
+app.use(cors());
   
 app.get("/", (req, res) => {
     res.status(200).json({ message :"메인화면" })

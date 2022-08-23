@@ -2,7 +2,8 @@ const jwt = require("jsonwebtoken");
 const { User } = require("../models");
 
 module.exports = (req, res, next) => {
-  const  token  = req.headers.token;
+  // const  token  = req.headers.token;
+  const {token} = req.cookies;
   console.log("토큰 확인", token);
 
   if (!token) {

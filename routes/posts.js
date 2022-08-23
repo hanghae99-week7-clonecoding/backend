@@ -90,51 +90,48 @@ router.post("/test", authMiddlewares, upload.fields([ {name:'file'},{name:'text'
     }
 });
 
-// 무한스크롤 기능
-// router.get("/scroll/:page", async (req, res) => {
+// 무한스크롤 페이징
+router.get("/scroll/:page", async (req, res) => {
 
-//     const {page} = req.params;
-//     const pageSize = 12;
-//     console.log("page: ", page);
-//     if (!page) {
-//         res.status(400).json({ result: false, error: "페이지 입력정보 오류" });
-//         return
-//     }
+    const {page} = req.params;
+    const pageSize = 12;
+    console.log("page: ", page);
+    if (!page) {
+        res.status(400).json({ result: false, error: "페이지 입력정보 오류" });
+        return
+    }
 
-//     let start = 0;
+    let start = 0;
 
-//     if (page <= 0) {
-//         page = 1;
-//     }
-//     else {
-//         start = (page - 1) * pageSize;
-//     }
+    if (page <= 0) {
+        page = 1;
+    }
+    else {
+        start = (page - 1) * pageSize;
+    }
 
-//     const totalPost = await Post.findAll();
-//     const count = totalPost.length;
+    const totalPost = await Post.findAll();
+    const count = totalPost.length;
+    console.log(count);
+
     
-//     if (page > Math.round(count / pageSize)) {
-//         res.status(200).json({message: "page overload"});
-//         return
-//     }
-
-//     try{
-//         const pageData = await Post.findAll({ offset: start, limit: pageSize });
+    try{
+        const pageData = await Post.findAll({ offset: start, limit: pageSize });
         
-//         if (pageData.length === 0) {
-//             res.status(200).json({result:false});
-//             return 
-//           } else {
-//             res.status(200).json({result:true, pageData});
-//             return
-//           }
+        if (pageData.length === 0) {
+            res.status(400).json({result:false, message:"페이지 초과"});
+            return 
+          } else {
+            res.status(200).json({result:true, pageData});
+            return
+          }
         
-//     }catch (err) {
-//         res.status(400).json({ result: false, error: "잘못된 요청값" });
-//         return
-//     }
+    }catch (err) {
+        res.status(400).json({ result: false, error: "잘못된 요청값" });
+        return
+    }
 
-// });
+});
 
 
 // 게시물 조회(메인)

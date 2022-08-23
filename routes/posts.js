@@ -3,12 +3,33 @@ const router = express.Router();
 const { Post, User } = require("../models");
 const authMiddlewares = require("../middleware/auth-middleware");
 
+// const {imageUploader} = require("../middleware/youtube_up");
+// const { imageUploader } = require('../middleware/youtube_up');
+
+// router.post('/test/image', imageUploader.single('file'), (req, res) => {
+//     res.send('good!')
+//   })
+const { upload } = require('../middleware/murter_s3');
+
+router.post('/test/image', upload.single('file'), async (req, res) => {
+    console.log(req.file)
+    const video = req.file.location;
+    console.log(video)
+    res.send('good!')
+	
+});
+
+
 // 게시물 생성
-router.post("/", authMiddlewares, async (req, res) => {
+router.post("/", authMiddlewares, upload.single('file'), async (req, res) => {
     try {
+        
+        const url = req.file.location; //murter를 통해 s3업로드후 s3에 url 가져온다.
         const { channel } = res.locals.user
         const { userimage } = await User.findOne({ where: { channel: channel } })
-        const { title, discription, category, url } = req.body
+        const { title, discription, category } = req.body
+        
+        
         if (title === "" || discription === "" || category === "" || url === "") {
             res.status(400).json({ result: false, errorMessage: "제목, 동영상, 카테고리, 내용을 입력해주세요.", })
             return

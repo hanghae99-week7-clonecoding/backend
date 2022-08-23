@@ -46,6 +46,15 @@ router.post("/", authMiddlewares, upload.single('file'), async (req, res) => {
     }
 });
 
+// router.post("/scroll", async (req,res) => {
+//     const pageInfo = req.query;
+//     const page = parseInt(pageInfo.page);
+//     const pageSize = parseInt(pageInfo.pageSize);
+
+
+// });
+
+
 // 게시물 조회(메인)
 router.get("/", async (req, res) => {
     const posts = await Post.findAll()

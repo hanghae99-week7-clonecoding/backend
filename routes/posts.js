@@ -23,8 +23,43 @@ router.post('/test/image', upload.single('file'), async (req, res) => {
 // 게시물 생성
 router.post("/", authMiddlewares, upload.single('file'), async (req, res) => {
     try {
+        const url = req.file.location //murter를 통해 s3업로드후 s3에 url 가져온다.
+        console.log(url)
+        if(!url) {
+            res.status(400).json({ result: false, errorMessage: "파일을 찾을 수 없습니다", })
+            return
+        }
+        const { channel } = res.locals.user
+        const { userimage } = await User.findOne({ where: { channel: channel } })
+        const { title, discription, category } = req.body
         
-        const url = req.file.location; //murter를 통해 s3업로드후 s3에 url 가져온다.
+        
+        if (title === "" || discription === "" || category === "" || url === "") {
+            res.status(400).json({ result: false, errorMessage: "제목, 동영상, 카테고리, 내용을 입력해주세요.", })
+            return
+        }
+
+        await Post.create({
+            title, discription, category, url, channel, userimage
+        })
+        res.status(200).json({ result: true, message: "작성이 완료 되었습니다.", });
+        
+    } catch (err) {
+        res.status(400).json({ result: false, errorMessage: "에러가 발생하였습니다." })
+        return
+    }
+});
+
+// 게시물 생성 테스트
+router.post("/test", authMiddlewares, upload.fields([ {name:'file'},{name:'text'}]), async (req, res) => {
+    try {
+        console.log(req.files)
+        const url = req.files.file[0].location //murter를 통해 s3업로드후 s3에 url 가져온다.
+        console.log(url)
+        if(!url) {
+            res.status(400).json({ result: false, errorMessage: "파일을 찾을 수 없습니다", })
+            return
+        }
         const { channel } = res.locals.user
         const { userimage } = await User.findOne({ where: { channel: channel } })
         const { title, discription, category } = req.body
@@ -74,7 +109,7 @@ router.get("/", async (req, res) => {
 });
 
 // 게시물 조회(카테고리)
-router.get("/serch/:category", async (req, res) => {
+router.get("/search/:category", async (req, res) => {
     const { category } = req.params;
     const posts = await Post.findAll({ where: { category } })
     res.status(200).json({
@@ -131,10 +166,10 @@ router.put("/:postId", authMiddlewares, async (req, res) => {
     try {
         const { channel } = res.locals.user
         const { postId } = req.params;
-        const { title, discription, category, url } = req.body;
+        const { title, discription, category } = req.body;
 
-        if (title === "" || discription === "" || category === "" || url === "") {
-            res.status(400).json({ result: false, errorMessage: "제목, 동영상, 카테고리, 내용을 입력해주세요.", })
+        if (title === "" || discription === "" || category === "" ) {
+            res.status(400).json({ result: false, errorMessage: "제목,  카테고리, 내용을 입력해주세요.", })
             return
         }
         if (!channel) {

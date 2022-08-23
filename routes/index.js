@@ -8,12 +8,12 @@ const postsRouter = require("./posts");
 
 
 const usersRouter = require("./users");
-// const likesRouter = require("./likes");
+const likesRouter = require("./likes");
 
 
 router.use("/user", usersRouter);
-// router.use("/like", likesRouter);
-router.use("/comment", commentsRouter);
+router.use("/like", likesRouter);
+
 
 router.use("/post", postsRouter);
 

@@ -1,9 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const commentsRouter = require("./comments")
-
-router.use("/comment", commentsRouter);
-
 const postsRouter = require("./posts");
 
 

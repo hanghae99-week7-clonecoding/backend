@@ -3,14 +3,16 @@ const router = express.Router();
 const { User } = require("../models");
 const jwt = require("jsonwebtoken");
 
+const { img_up } = require('../middleware/user_image');
 
-
-router.post("/signup", async (req, res) => {
-    const { email, userimage, channel, password, confirmPassword } = req.body;
+router.post("/signup", img_up.single('img'), async (req, res) => {
+    const { email, channel, password, confirmPassword } = req.body;
     const regPassword = /^[A-Za-z0-9]{6,20}$/;
     const regChannel = /^[A-Za-z가-힣0-9]{2,15}$/;
     const regEmail = /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/;
 
+    const userimage = req.file.location //murter를 통해 s3업로드후 s3에 url 가져온다.
+    console.log(userimage)
 
     if (password !== confirmPassword) {
         res.status(400).json({ result: false, error: "비밀번호가 일치하지 않습니다." });
@@ -45,7 +47,7 @@ router.post("/signup", async (req, res) => {
         res.status(400).json({ result: false, error: "채널명을 확인해주세요." });
         return;
     }
-
+    
 
 
     await User.create({ channel, email, password, userimage });

@@ -10,6 +10,9 @@ const authMiddlewares = require("../middleware/auth-middleware");
 //     res.send('good!')
 //   })
 const { upload } = require('../middleware/murter_s3');
+const delete_s3 = require("../middleware/delete_s3");
+
+
 
 router.post('/test/image', upload.single('file'), async (req, res) => {
     console.log(req.file)
@@ -25,10 +28,6 @@ router.post("/", authMiddlewares, upload.single('file'), async (req, res) => {
     try {
         const url = req.file.location //murter를 통해 s3업로드후 s3에 url 가져온다.
         console.log(url)
-        if(!url) {
-            res.status(400).json({ result: false, errorMessage: "파일을 찾을 수 없습니다", })
-            return
-        }
         const { channel } = res.locals.user
         const { userimage } = await User.findOne({ where: { channel: channel } })
         const { title, discription, category } = req.body
@@ -99,7 +98,7 @@ router.get("/", async (req, res) => {
             postId : post.postId,
             title: post.title,
             category: post.category,
-            description: post.description,
+            discription: post.discription,
             url: post.url,
             like: post.like,
             channel: post.channel
@@ -117,7 +116,7 @@ router.get("/search/:category", async (req, res) => {
             postId : post.postId,
             title: post.title,
             category: post.category,
-            description: post.description,
+            discription: post.discription,
             url: post.url,
             like: post.like,
             channel: post.channel
@@ -147,7 +146,7 @@ router.get("/:postId", async (req, res) => {
                     postId : post.postId,
                     title: post.title,
                     category: post.category,
-                    description: post.description,
+                    discription: post.discription,
                     url: post.url,
                     like: post.like,
                     channel: post.channel,
@@ -170,10 +169,6 @@ router.put("/:postId", authMiddlewares, async (req, res) => {
 
         if (title === "" || discription === "" || category === "" ) {
             res.status(400).json({ result: false, errorMessage: "제목,  카테고리, 내용을 입력해주세요.", })
-            return
-        }
-        if (!channel) {
-            res.status(400).send({ result: false, errorMessage: "로그인을 해주세요" })
             return
         }
         const post = await Post.findOne({ where: { postId } })
@@ -206,11 +201,8 @@ router.delete("/:postId",authMiddlewares, async (req, res) => {
     try {
     const { channel } = res.locals.user
     const { postId } = req.params;
-    if (!channel) {
-        res.status(400).send({ result: false, errorMessage: "로그인을 해주세요" })
-        return
-    }
     const post = await Post.findOne({ where: { postId } })
+
     if (!post) {
         res.status(400).json({ result: false, errorMessage: "해당 게시물이 존재하지 않습니다.", });
         return
@@ -219,6 +211,7 @@ router.delete("/:postId",authMiddlewares, async (req, res) => {
         res.status(400).json({ result: false, errorMessage: "본인글만 삭제할 수 있습니다", });
         return
     } else {
+        delete_s3(post)
         await post.destroy()
         res.status(200).json({
             resutl: true,
@@ -226,7 +219,7 @@ router.delete("/:postId",authMiddlewares, async (req, res) => {
         }
         )
     }} catch (err) {
-        res.status(200).json({ result: false, errorMessage: "에러가 발생하였습니다." })
+        res.status(400).json({ result: false, errorMessage: "에러가 발생하였습니다." })
     }
 })
 

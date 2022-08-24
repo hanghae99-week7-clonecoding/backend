@@ -108,6 +108,38 @@ router.get("/search/:category", async (req, res) => {
 
 });
 
+//게시물 검색
+router.post("/searchkey", async (req, res) => {
+    const { keyword } = req.body;
+
+    const list = await Post.findAll({
+        where: {
+            [Op.or]: [
+                {
+                    title: {
+                        [Op.like]: "%" + keyword + "%",
+                    },
+                },
+                {
+                    channel: {
+                        [Op.like]: "%" + keyword + "%",
+                    },
+                },
+            ],
+        },
+    });
+
+    if (!list) {
+        res.status(400).json({ result: false, message: "게시글이 존재하지 않습니다." });
+        return
+    }
+    else {
+        res.status(200).json({ result: list });
+        return
+    }
+
+});
+
 
 //  게시물 상세조회(detail페이지) 
 router.get("/:postId", subs_middleware, async (req, res) => {
@@ -213,39 +245,6 @@ router.put("/:postId", authMiddlewares, async (req, res) => {
         res.status(200).json({ result: false, errorMessage: "에러가 발생하였습니다." })
     }
 });
-
-//게시물 검색
-router.post("/searchkey", async (req, res) => {
-    const { keyword } = req.body;
-
-    const list = await Post.findAll({
-        where: {
-            [Op.or]: [
-                {
-                    title: {
-                        [Op.like]: "%" + keyword + "%",
-                    },
-                },
-                {
-                    channel: {
-                        [Op.like]: "%" + keyword + "%",
-                    },
-                },
-            ],
-        },
-    });
-
-    if (!list) {
-        res.status(400).json({ result: false, message: "게시글이 존재하지 않습니다." });
-        return
-    }
-    else {
-        res.status(200).json({ result: list });
-        return
-    }
-
-});
-
 
 //게시글 삭제    
 router.delete("/:postId", authMiddlewares, async (req, res) => {

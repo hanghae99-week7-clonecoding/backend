@@ -82,7 +82,8 @@ router.get("/", async (req, res) => {
             discription: post.discription,
             url: post.url,
             like: post.like,
-            channel: post.channel
+            channel: post.channel,
+            userimage: post.userimage
         }))
     })
 
@@ -100,7 +101,8 @@ router.get("/search/:category", async (req, res) => {
             discription: post.discription,
             url: post.url,
             like: post.like,
-            channel: post.channel
+            channel: post.channel,
+            userimage: post.userimage
         }))
     })
 
@@ -112,11 +114,7 @@ router.get("/:postId", async (req, res) => {
     try {
         const { postId } = req.params;
         const post = await Post.findOne({
-            where: { postId },
-            include: {
-                model: User,
-                attributes: ["channel", "userimage"]
-            }
+            where: { postId }
         })
         if (post === null) {
             res.status(400).json({ result: false, errorMessage: "해당 게시물이 존재하지 않습니다.", });
@@ -131,7 +129,7 @@ router.get("/:postId", async (req, res) => {
                     url: post.url,
                     like: post.like,
                     channel: post.channel,
-                    userimage: post.userimage
+                    userimage: post.userimage,
                 }
             })
         }
@@ -166,7 +164,6 @@ router.put("/:postId", authMiddlewares, async (req, res) => {
                 title: title,
                 discription: discription,
                 category: category,
-                url: url
             })
             res.json({ result: true, message: "게시글을 수정하였습니다." })
             return

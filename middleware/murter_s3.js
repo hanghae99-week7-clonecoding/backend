@@ -11,7 +11,7 @@ const s3 = new AWS.S3({
 
 const fileFilter = (req, file, callback) => {
     const ext = path.extname(file.originalname).toLocaleLowerCase();
-    if (ext !== '.mp4') callback({ message: '비디오 파일 형식이 맞지 않습니다.' }, false);
+    if (ext !== '.mp4') {errMassage ='비디오 파일 형식이 맞지 않습니다.', callback(errMassage, false);}
     else callback(null, true);
     
 };

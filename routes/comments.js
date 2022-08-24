@@ -103,7 +103,7 @@ router.put("/:commentId", authMiddleware, async(req, res) => {
     res.status(400).json({ message });
   }
 });
-//게시글 삭제 api with delete ('/comment/commentId')
+//댓글 삭제 api with delete ('/comment/commentId')
 router.delete("/:commentId", authMiddleware, async(req, res) => {
   try{
     const {commentId} = req.params;

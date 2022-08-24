@@ -26,7 +26,6 @@ const storage = multerS3({
     }
 
 });
-
 const upload = multer({ 
     storage: storage,
     fileFilter: fileFilter,

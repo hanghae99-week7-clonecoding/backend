@@ -28,8 +28,6 @@ const storage = multerS3({
 
 });
 
-
-
 const img_up = multer({ 
     storage: storage,
     fileFilter: fileFilter,

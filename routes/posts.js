@@ -6,15 +6,6 @@ const authMiddlewares = require("../middleware/auth-middleware");
 const { upload } = require('../middleware/murter_s3');
 const delete_s3 = require("../middleware/delete_s3");
 
-router.post('/test/image', upload.single('file'), async (req, res) => {
-    console.log(req.file)
-    const video = req.file.location;
-    console.log(video)
-    res.send('good!')
-	
-});
-
-
 // 게시물 생성
 router.post("/", authMiddlewares, upload.single('file'), async (req, res) => {
     try {
@@ -41,6 +32,7 @@ router.post("/", authMiddlewares, upload.single('file'), async (req, res) => {
     }
 });
 
+//무한스크롤
 router.get("/scroll/:page", async (req, res) => {
 
     const {page} = req.params;
@@ -50,21 +42,15 @@ router.get("/scroll/:page", async (req, res) => {
         res.status(400).json({ result: false, error: "페이지 입력정보 오류" });
         return
     }
-
     let start = 0;
-
     if (page <= 0) {
         page = 1;
-    }
-    else {
+    }else {
         start = (page - 1) * pageSize;
     }
-
     const totalPost = await Post.findAll();
     const count = totalPost.length;
     console.log("현재 저장된 게시물 수: ", count);
-
-    
     try{
         const pageData = await Post.findAll({ offset: start, limit: pageSize });
         
@@ -75,12 +61,10 @@ router.get("/scroll/:page", async (req, res) => {
             res.status(200).json({result:true, pageData});
             return
           }
-        
     }catch (err) {
         res.status(400).json({ result: false, error: "잘못된 요청값" });
         return
     }
-
 });
 
 
@@ -90,7 +74,7 @@ router.get("/", async (req, res) => {
 
     res.status(200).json({
         result: posts.map((post) => ({
-            postId : post.postId,
+            postId: post.postId,
             title: post.title,
             category: post.category,
             discription: post.discription,
@@ -108,7 +92,7 @@ router.get("/search/:category", async (req, res) => {
     const posts = await Post.findAll({ where: { category } })
     res.status(200).json({
         result: posts.map((post) => ({
-            postId : post.postId,
+            postId: post.postId,
             title: post.title,
             category: post.category,
             discription: post.discription,
@@ -138,7 +122,7 @@ router.get("/:postId", async (req, res) => {
         } else {
             res.status(200).json({
                 result: {
-                    postId : post.postId,
+                    postId: post.postId,
                     title: post.title,
                     category: post.category,
                     discription: post.discription,
@@ -192,7 +176,7 @@ router.put("/:postId", authMiddlewares, async (req, res) => {
 
 
 //게시글 삭제    
-router.delete("/:postId",authMiddlewares, async (req, res) => {
+router.delete("/:postId", authMiddlewares, async (req, res) => {
     try {
     const { channel } = res.locals.user
     const { postId } = req.params;
@@ -215,6 +199,7 @@ router.delete("/:postId",authMiddlewares, async (req, res) => {
         )
     }} catch (err) {
         res.status(400).json({ result: false, errorMessage: "에러가 발생하였습니다." })
+
     }
 })
 

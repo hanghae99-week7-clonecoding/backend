@@ -1,15 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const mysql = require("mysql");
 const { Post, User } = require("../models");
 const authMiddlewares = require("../middleware/auth-middleware");
-
-const connection = mysql.createConnection({
-    host: process.env.mysqlhost,
-    user: process.env.mysqlname,
-    password: process.env.mysqlpassword,
-});
-
 
 // const {imageUploader} = require("../middleware/youtube_up");
 // const { imageUploader } = require('../middleware/youtube_up');
@@ -17,6 +9,7 @@ const connection = mysql.createConnection({
 // router.post('/test/image', imageUploader.single('file'), (req, res) => {
 //     res.send('good!')
 //   })
+
 const { upload } = require('../middleware/murter_s3');
 const delete_s3 = require("../middleware/delete_s3");
 
@@ -95,7 +88,7 @@ router.get("/scroll/:page", async (req, res) => {
 
     const {page} = req.params;
     const pageSize = 12;
-    console.log("page: ", page);
+    
     if (!page) {
         res.status(400).json({ result: false, error: "페이지 입력정보 오류" });
         return
@@ -112,7 +105,7 @@ router.get("/scroll/:page", async (req, res) => {
 
     const totalPost = await Post.findAll();
     const count = totalPost.length;
-    console.log(count);
+    console.log("현재 저장된 게시물 수: ", count);
 
     
     try{

@@ -2,9 +2,9 @@ const express = require("express");
 const router = express.Router();
 const sequelize = require("sequelize");
 const Op = sequelize.Op;
-const { Post, User } = require("../models");
+const { Post, User, Subs } = require("../models");
 const authMiddlewares = require("../middleware/auth-middleware");
-
+const subs_middleware = require("../middleware/subs_middleware");
 const { upload } = require('../middleware/murter_s3');
 const delete_s3 = require("../middleware/delete_s3");
 
@@ -110,33 +110,74 @@ router.get("/search/:category", async (req, res) => {
 
 
 //  게시물 상세조회(detail페이지) 
-router.get("/:postId", async (req, res) => {
-    try {
-        const { postId } = req.params;
-        const post = await Post.findOne({
-            where: { postId }
-        })
-        if (post === null) {
-            res.status(400).json({ result: false, errorMessage: "해당 게시물이 존재하지 않습니다.", });
-            return;
-        } else {
-            res.status(200).json({
-                result: {
-                    postId: post.postId,
-                    title: post.title,
-                    category: post.category,
-                    discription: post.discription,
-                    url: post.url,
-                    like: post.like,
-                    channel: post.channel,
-                    userimage: post.userimage,
-                }
+router.get("/:postId", subs_middleware, async (req, res) => {
+    const { userId } = res.locals.user
+    if (!userId) {
+        try {
+            const { postId } = req.params;
+            const post = await Post.findOne({
+                where: { postId }
             })
+            if (post === null) {
+                res.status(400).json({ result: false, errorMessage: "해당 게시물이 존재하지 않습니다.", });
+                return;
+            } else {
+                res.status(200).json({
+                    result: {
+                        postId: post.postId,
+                        title: post.title,
+                        category: post.category,
+                        discription: post.discription,
+                        url: post.url,
+                        like: post.like,
+                        channel: post.channel,
+                        userimage: post.userimage,
+                    }
+                })
+            }
+        } catch (err) {
+            res.status(400).json({ result: false, errorMessage: "에러가 발생하였습니다." });
+            return;
         }
-    } catch (err) {
-        res.status(400).json({ result: false, errorMessage: "에러가 발생하였습니다." });
-        return;
+
+    } else {
+        try {
+            const { postId } = req.params;
+            const post = await Post.findOne({
+                where: { postId }
+            })
+            if (post === null) {
+                res.status(400).json({ result: false, errorMessage: "해당 게시물이 존재하지 않습니다.", });
+                return;
+            } else {
+                const subs = post.channel
+                const existsubs = await Subs.findOne({ where: { channel: subs, userId: userId } })
+                if (existsubs) {
+                    var subscribe = "구독자"
+                } else {
+                    var subscribe = "비구독자"
+                }
+                res.status(200).json({
+                    result: {
+                        postId: post.postId,
+                        title: post.title,
+                        category: post.category,
+                        discription: post.discription,
+                        url: post.url,
+                        like: post.like,
+                        channel: post.channel,
+                        userimage: post.userimage,
+                        subscribe: subscribe
+                    }
+                })
+            }
+        } catch (err) {
+            res.status(400).json({ result: false, errorMessage: "에러가 발생하였습니다." });
+            return;
+        }
+
     }
+
 });
 
 //게시물 수정  
@@ -176,7 +217,7 @@ router.put("/:postId", authMiddlewares, async (req, res) => {
 //게시물 검색
 router.post("/search", async (req, res) => {
     const { keyword } = req.body;
-    
+
     const list = await Post.findAll({
         where: {
             [Op.or]: [

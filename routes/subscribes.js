@@ -1,30 +1,29 @@
 const express = require("express");
 const router = express.Router();
-const { User, Subscribe } = require("../models");
+const { User, Subs, Post } = require("../models");
 
 const authMiddleware = require("../middleware/auth-middleware");
 
-router.post("/", authMiddleware, async(req, res) => {
+router.post("/:postId", authMiddleware, async(req, res) => {
   try {        
-    const { user } = await res.locals;
-    const channel = user.channel;
-    const userId = user.userId
+    const { channel } = res.locals.user;    
+    const { postId }  = req.params;    
+    
+    const data = await Post.findOne({ where: { postId } });        
+    const target = data.channel    
+    const userdata = await User.findOne({ where: { channel: target } }); 
+    const userId = userdata.userId           
 
-    const subscribeUser = await User.findOne({ where: { channel, userId } });    
-    if(!subscribeUser) {
-      return res.json({ message: "채널을 구독하려면 로그인 해주세요." });
-    }
-
-    const postToSubcribe = await Subscribe.findOne({ where: { channel } });         
+    const postToSubcribe = await Subs.findOne({ where: { channel,userId } });     
       if(!postToSubcribe){
-        await User.update({ subscribe: postToSubcribe +1 }, { where: { channel } });
-        await Subscribe.create({ channel });             
-        return res.status(200).json({ message: "구독이 추가되었습니다." })
+        await User.update({ subscribe: postToSubcribe +1 }, { where: { channel,userId } });
+        await Subs.create({ channel,userId });             
+        return res.status(200).json({ message: "구독이 추가되었습니다." });
       }else{
-        await User.update({ subscribe: postToSubcribe -1 }, { where: { channel } });
-        await Subscribe.destroy({ where: { channel:channel } });             
-        return res.status(200).json({ message: "구독정보가 삭제되었습니다." })        
-      }      
+        await User.update({ subscribe: postToSubcribe -1 }, { where: { channel,userId } });
+        await Subs.destroy({ where: { channel:channel, userId:userId } });             
+        return res.status(200).json({ message: "구독정보가 삭제되었습니다." });
+      } 
   }catch(error){
   const message = `${req.method} ${req.originalUrl} : ${error.message}`;
   console.log(message);

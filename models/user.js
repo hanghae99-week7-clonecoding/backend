@@ -30,6 +30,14 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "channel",
         sourceKey: "channel",
       });
+      this.hasMany(models.Subs, {
+        foreignKey: "channel",
+        sourceKey: "channel",
+      });
+      this.hasMany(models.Subs, {
+        foreignKey: "userId",
+        sourceKey: "userId",
+      });
     }
   }
   User.init({

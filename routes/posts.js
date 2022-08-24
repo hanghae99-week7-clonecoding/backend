@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const sequelize = require("sequelize");
+const Op = sequelize.Op;
 const { Post, User } = require("../models");
 const authMiddlewares = require("../middleware/auth-middleware");
 
@@ -14,8 +16,8 @@ router.post("/", authMiddlewares, upload.single('file'), async (req, res) => {
         const { channel } = res.locals.user
         const { userimage } = await User.findOne({ where: { channel: channel } })
         const { title, discription, category } = req.body
-        
-        
+
+
         if (title === "" || discription === "" || category === "" || url === "") {
             res.status(400).json({ result: false, errorMessage: "제목, 동영상, 카테고리, 내용을 입력해주세요.", })
             return
@@ -25,7 +27,7 @@ router.post("/", authMiddlewares, upload.single('file'), async (req, res) => {
             title, discription, category, url, channel, userimage
         })
         res.status(200).json({ result: true, message: "작성이 완료 되었습니다.", });
-        
+
     } catch (err) {
         res.status(400).json({ result: false, errorMessage: "에러가 발생하였습니다." })
         return
@@ -35,9 +37,9 @@ router.post("/", authMiddlewares, upload.single('file'), async (req, res) => {
 //무한스크롤
 router.get("/scroll/:page", async (req, res) => {
 
-    const {page} = req.params;
+    const { page } = req.params;
     const pageSize = 12;
-    
+
     if (!page) {
         res.status(400).json({ result: false, error: "페이지 입력정보 오류" });
         return
@@ -45,23 +47,23 @@ router.get("/scroll/:page", async (req, res) => {
     let start = 0;
     if (page <= 0) {
         page = 1;
-    }else {
+    } else {
         start = (page - 1) * pageSize;
     }
     const totalPost = await Post.findAll();
     const count = totalPost.length;
     console.log("현재 저장된 게시물 수: ", count);
-    try{
+    try {
         const pageData = await Post.findAll({ offset: start, limit: pageSize });
-        
+
         if (pageData.length === 0) {
-            res.status(400).json({result:false, message:"페이지 초과"});
-            return 
-          } else {
-            res.status(200).json({result:true, pageData});
+            res.status(400).json({ result: false, message: "페이지 초과" });
             return
-          }
-    }catch (err) {
+        } else {
+            res.status(200).json({ result: true, pageData });
+            return
+        }
+    } catch (err) {
         res.status(400).json({ result: false, error: "잘못된 요청값" });
         return
     }
@@ -146,7 +148,7 @@ router.put("/:postId", authMiddlewares, async (req, res) => {
         const { postId } = req.params;
         const { title, discription, category } = req.body;
 
-        if (title === "" || discription === "" || category === "" ) {
+        if (title === "" || discription === "" || category === "") {
             res.status(400).json({ result: false, errorMessage: "제목,  카테고리, 내용을 입력해주세요.", })
             return
         }
@@ -172,36 +174,69 @@ router.put("/:postId", authMiddlewares, async (req, res) => {
     } catch (err) {
         res.status(200).json({ result: false, errorMessage: "에러가 발생하였습니다." })
     }
-})
+});
+
+//게시물 검색
+router.post("/search", async (req, res) => {
+    const { keyword } = req.body;
+    
+    const list = await Post.findAll({
+        where: {
+            [Op.or]: [
+                {
+                    title: {
+                        [Op.like]: "%" + keyword + "%",
+                    },
+                },
+                {
+                    channel: {
+                        [Op.like]: "%" + keyword + "%",
+                    },
+                },
+            ],
+        },
+    });
+
+    if (!list) {
+        res.status(400).json({ result: false, message: "게시글이 존재하지 않습니다." });
+        return
+    }
+    else {
+        res.status(200).json({ result: list });
+        return
+    }
+
+});
 
 
 //게시글 삭제    
 router.delete("/:postId", authMiddlewares, async (req, res) => {
     try {
-    const { channel } = res.locals.user
-    const { postId } = req.params;
-    const post = await Post.findOne({ where: { postId } })
+        const { channel } = res.locals.user
+        const { postId } = req.params;
+        const post = await Post.findOne({ where: { postId } })
 
-    if (!post) {
-        res.status(400).json({ result: false, errorMessage: "해당 게시물이 존재하지 않습니다.", });
-        return
-    }
-    if (channel !== post.channel) {
-        res.status(400).json({ result: false, errorMessage: "본인글만 삭제할 수 있습니다", });
-        return
-    } else {
-        delete_s3(post)
-        await post.destroy()
-        res.status(200).json({
-            resutl: true,
-            message: "게시글을 삭제하였습니다."
+        if (!post) {
+            res.status(400).json({ result: false, errorMessage: "해당 게시물이 존재하지 않습니다.", });
+            return
         }
-        )
-    }} catch (err) {
+        if (channel !== post.channel) {
+            res.status(400).json({ result: false, errorMessage: "본인글만 삭제할 수 있습니다", });
+            return
+        } else {
+            delete_s3(post)
+            await post.destroy()
+            res.status(200).json({
+                resutl: true,
+                message: "게시글을 삭제하였습니다."
+            }
+            )
+        }
+    } catch (err) {
         res.status(400).json({ result: false, errorMessage: "에러가 발생하였습니다." })
 
     }
-})
+});
 
 
 

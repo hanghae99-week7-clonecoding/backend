@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 
 const { img_up } = require('../middleware/user_image');
 
+
 router.post("/signup", img_up.single('img'), async (req, res) => {
     const { email, channel, password, confirmPassword } = req.body;
     const regPassword = /^[A-Za-z0-9]{6,20}$/;

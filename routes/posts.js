@@ -215,7 +215,7 @@ router.put("/:postId", authMiddlewares, async (req, res) => {
 });
 
 //게시물 검색
-router.post("/search", async (req, res) => {
+router.post("/searchkey", async (req, res) => {
     const { keyword } = req.body;
 
     const list = await Post.findAll({

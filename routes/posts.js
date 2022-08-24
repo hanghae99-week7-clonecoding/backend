@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { Post, User } = require("../models");
+const { Post, User, Subs } = require("../models");
 const authMiddlewares = require("../middleware/auth-middleware");
 
 const { upload } = require('../middleware/murter_s3');
@@ -80,7 +80,8 @@ router.get("/", async (req, res) => {
             discription: post.discription,
             url: post.url,
             like: post.like,
-            channel: post.channel
+            channel: post.channel,
+            userimage: post.userimage
         }))
     })
 
@@ -98,7 +99,8 @@ router.get("/search/:category", async (req, res) => {
             discription: post.discription,
             url: post.url,
             like: post.like,
-            channel: post.channel
+            channel: post.channel,
+            userimage: post.userimage
         }))
     })
 
@@ -110,16 +112,20 @@ router.get("/:postId", async (req, res) => {
     try {
         const { postId } = req.params;
         const post = await Post.findOne({
-            where: { postId },
-            include: {
-                model: User,
-                attributes: ["channel", "userimage"]
-            }
+            where: { postId }
         })
         if (post === null) {
             res.status(400).json({ result: false, errorMessage: "해당 게시물이 존재하지 않습니다.", });
             return;
         } else {
+            const { userId } = res.locals.user
+            const subs = post.channel
+            const existsubs = await Subs.findOne({where :{ channel : subs, userId : userId }})
+            if (existsubs) {
+                subscribe = "구독자"
+            }else{
+                subscribe = "비구독자"
+            }
             res.status(200).json({
                 result: {
                     postId: post.postId,
@@ -129,7 +135,8 @@ router.get("/:postId", async (req, res) => {
                     url: post.url,
                     like: post.like,
                     channel: post.channel,
-                    userimage: post.userimage
+                    userimage: post.userimage,
+                    subscribe: subscribe
                 }
             })
         }
@@ -164,7 +171,6 @@ router.put("/:postId", authMiddlewares, async (req, res) => {
                 title: title,
                 discription: discription,
                 category: category,
-                url: url
             })
             res.json({ result: true, message: "게시글을 수정하였습니다." })
             return

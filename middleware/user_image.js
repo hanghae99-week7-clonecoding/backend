@@ -11,8 +11,8 @@ const s3 = new AWS.S3({
 
 const fileFilter = (req, file, callback) => {
     const ext = path.extname(file.originalname).toLocaleLowerCase();
-    if (ext !== '.jpg' && ext !== '.png' && ext !== '.jpeg') callback({ message: '이미지 파일 형식이 맞지 않습니다.' }, false);
-    else callback(null, true);
+    if (ext !== '.jpg' && ext !== '.png' && ext !== '.jpeg') {errMassage = '이미지 파일 형식이 맞지 않습니다.', callback(errMassage, false);}
+    else callback(null, true);                              
     
 };
 

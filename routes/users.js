@@ -115,7 +115,8 @@ router.post("/login", async (req, res) => {
         result: true,
         token: token,
         email: user.email,
-        channel: user.channel
+        channel: user.channel,
+        userimage : user.userimage
     };
 
     res.status(200).json(payload);

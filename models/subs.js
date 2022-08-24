@@ -21,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Subs.init({
-      subscribeId: {     
+      subsId: {     
       allowNull : false,
       autoIncrement: true,
       primaryKey: true,

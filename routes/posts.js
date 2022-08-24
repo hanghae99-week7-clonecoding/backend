@@ -118,14 +118,6 @@ router.get("/:postId", async (req, res) => {
             res.status(400).json({ result: false, errorMessage: "해당 게시물이 존재하지 않습니다.", });
             return;
         } else {
-            const { userId } = res.locals.user
-            const subs = post.channel
-            const existsubs = await Subs.findOne({where :{ channel : subs, userId : userId }})
-            if (existsubs) {
-                subscribe = "구독자"
-            }else{
-                subscribe = "비구독자"
-            }
             res.status(200).json({
                 result: {
                     postId: post.postId,
@@ -136,7 +128,6 @@ router.get("/:postId", async (req, res) => {
                     like: post.like,
                     channel: post.channel,
                     userimage: post.userimage,
-                    subscribe: subscribe
                 }
             })
         }

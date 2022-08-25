@@ -73,8 +73,7 @@ router.get("/scroll/:page", async (req, res) => {
 
 // 게시물 조회(메인)
 router.get("/", async (req, res) => {
-    const posts = await Post.findAll()
-
+    const posts = await Post.findAll({order: [["createdAt", "DESC"]]})
     res.status(200).json({
         result: posts.map((post) => ({
             postId: post.postId,
@@ -85,6 +84,7 @@ router.get("/", async (req, res) => {
             like: post.like,
             channel: post.channel,
             userimage: post.userimage
+            
         }))
     })
 
@@ -93,7 +93,7 @@ router.get("/", async (req, res) => {
 // 게시물 조회(카테고리)
 router.get("/search/:category", async (req, res) => {
     const { category } = req.params;
-    const posts = await Post.findAll({ where: { category } })
+    const posts = await Post.findAll({ where: { category }, order: [["createdAt", "DESC"]] })
     res.status(200).json({
         result: posts.map((post) => ({
             postId: post.postId,

@@ -23,12 +23,14 @@ router.post("/:postId", authMiddleware, async (req, res) => {
 
       if (!likedPost) {
         await Post.update({ like: postToLike +1 }, { where: { postId } });
+        result = postToLike +1
         await like.create({ channel, postId });
-        return res.status(200).json({ message:"이 동영상이 마음에 듭니다." });
+        return res.status(200).json({ message:"이 동영상이 마음에 듭니다.", result});
       } else {
         await Post.update({ like: postToLike -1 }, { where: { postId }});
+        result = postToLike -1
         await like.destroy({ where: { channel:channel, postId:postId } });
-        return res.status(200).json({ message: "좋아요 취소!" });
+        return res.status(200).json({ message: "좋아요 취소!" ,result });
       }
     }       
   }catch(error){

@@ -7,7 +7,9 @@ module.exports = (req, res, next) => {
   console.log("토큰 확인", token);
 
   if (!token) {
+    res.locals.user = 1;
     next();
+    return
   } 
   
   try {

@@ -145,7 +145,9 @@ router.get("/searchkey/:keyword", async (req, res) => {
 //  게시물 상세조회(detail페이지) 
 router.get("/:postId", subs_middleware, async (req, res) => {
     const { userId } = res.locals.user
-    if (!userId) {
+    console.log(res.locals.user)
+    console.log(userId)
+    if (userId == undefined) {
         try {
             const { postId } = req.params;
             const post = await Post.findOne({
@@ -165,6 +167,7 @@ router.get("/:postId", subs_middleware, async (req, res) => {
                         like: post.like,
                         channel: post.channel,
                         userimage: post.userimage,
+                        subscribe: "비구독자"
                     }
                 })
             }

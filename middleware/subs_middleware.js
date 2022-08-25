@@ -6,7 +6,7 @@ module.exports = (req, res, next) => {
   // const {token} = req.cookies;
   console.log("토큰 확인", token);
 
-  if (token == undefined) {
+  if (token == undefined || !token) {
     res.locals.user = 1;
     next();
     return

@@ -10,9 +10,8 @@ module.exports = (req, res, next) => {
     res.locals.user = 1;
     next();
     return
-  } 
-
-  try {
+  }else{ 
+    try {
     const { userId } = jwt.verify(token, process.env.mySecretKey); // userId 는 jwt.sign(userId : user._id)의 user._id가 할당된다.
 
     User.findByPk(userId).then((user) => {
@@ -23,5 +22,7 @@ module.exports = (req, res, next) => {
     res.status(401).json({ result: false, error: "로그인이 필요합니다2." });
 
     return;
-  }
+  }}
+
+ 
 };

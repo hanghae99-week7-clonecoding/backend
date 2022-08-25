@@ -53,6 +53,7 @@ router.get("/scroll/:page", async (req, res) => {
     const totalPost = await Post.findAll();
     const count = totalPost.length;
     console.log("현재 저장된 게시물 수: ", count);
+    
     try {
         const pageData = await Post.findAll({ offset: start, limit: pageSize });
 
@@ -105,6 +106,38 @@ router.get("/search/:category", async (req, res) => {
             userimage: post.userimage
         }))
     })
+
+});
+
+//게시물 검색
+router.get("/searchkey/:keyword", async (req, res) => {
+    const { keyword } = req.params;
+
+    const list = await Post.findAll({
+        where: {
+            [Op.or]: [
+                {
+                    title: {
+                        [Op.like]: "%" + keyword + "%",
+                    },
+                },
+                {
+                    channel: {
+                        [Op.like]: "%" + keyword + "%",
+                    },
+                },
+            ],
+        },
+    });
+
+    if (!list) {
+        res.status(400).json({ result: false, message: "게시글이 존재하지 않습니다." });
+        return
+    }
+    else {
+        res.status(200).json({ result: list });
+        return
+    }
 
 });
 
@@ -216,39 +249,6 @@ router.put("/:postId", authMiddlewares, async (req, res) => {
         res.status(200).json({ result: false, errorMessage: "에러가 발생하였습니다." })
     }
 });
-
-//게시물 검색
-router.post("/search", async (req, res) => {
-    const { keyword } = req.body;
-
-    const list = await Post.findAll({
-        where: {
-            [Op.or]: [
-                {
-                    title: {
-                        [Op.like]: "%" + keyword + "%",
-                    },
-                },
-                {
-                    channel: {
-                        [Op.like]: "%" + keyword + "%",
-                    },
-                },
-            ],
-        },
-    });
-
-    if (!list) {
-        res.status(400).json({ result: false, message: "게시글이 존재하지 않습니다." });
-        return
-    }
-    else {
-        res.status(200).json({ result: list });
-        return
-    }
-
-});
-
 
 //게시글 삭제    
 router.delete("/:postId", authMiddlewares, async (req, res) => {

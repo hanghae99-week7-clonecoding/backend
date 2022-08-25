@@ -20,7 +20,7 @@ router.post("/:postId", authMiddleware, async (req, res) => {
   if(!posts) {
     return res.json({ message: "해당 게시글이 없습니다." });
   }
-  const { user } = await res.locals;
+  const { user } = res.locals;
   
   await Comment.create({ 
     postId,

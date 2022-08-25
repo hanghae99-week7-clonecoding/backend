@@ -4,7 +4,7 @@ const sequelize = require("sequelize");
 const Op = sequelize.Op;
 const { Post, User, Subs } = require("../models");
 const authMiddlewares = require("../middleware/auth-middleware");
-const subs_middleware = require("../middleware/subs_middleware");
+const subs_middleware = require("../middleware/subs_middleware");// 오류발생으로 일단보류
 const { upload } = require('../middleware/murter_s3');
 const delete_s3 = require("../middleware/delete_s3");
 
@@ -143,78 +143,105 @@ router.get("/searchkey/:keyword", async (req, res) => {
 
 
 //  게시물 상세조회(detail페이지) 
-router.get("/:postId", subs_middleware, async (req, res) => {
-    const { userId } = res.locals.user
-    console.log(res.locals.user)
-    console.log(userId)
-    if (userId == undefined) {
-        try {
-            const { postId } = req.params;
-            const post = await Post.findOne({
-                where: { postId }
-            })
-            if (post === null) {
-                res.status(400).json({ result: false, errorMessage: "해당 게시물이 존재하지 않습니다.", });
-                return;
-            } else {
-                res.status(200).json({
-                    result: {
-                        postId: post.postId,
-                        title: post.title,
-                        category: post.category,
-                        discription: post.discription,
-                        url: post.url,
-                        like: post.like,
-                        channel: post.channel,
-                        userimage: post.userimage,
-                        subscribe: "비구독자"
-                    }
-                })
-            }
-        } catch (err) {
-            res.status(400).json({ result: false, errorMessage: "에러가 발생하였습니다." });
-            return;
-        }
+// router.get("/:postId", async (req, res) => {
+//     const { userId } = res.locals.user
+//     console.log(res.locals.user)
+//     console.log(userId)
+//     if (userId == undefined) {
+//         try {
+//             const { postId } = req.params;
+//             const post = await Post.findOne({
+//                 where: { postId }
+//             })
+//             if (post === null) {
+//                 res.status(400).json({ result: false, errorMessage: "해당 게시물이 존재하지 않습니다.", });
+//                 return;
+//             } else {
+//                 res.status(200).json({
+//                     result: {
+//                         postId: post.postId,
+//                         title: post.title,
+//                         category: post.category,
+//                         discription: post.discription,
+//                         url: post.url,
+//                         like: post.like,
+//                         channel: post.channel,
+//                         userimage: post.userimage,
+//                         subscribe: "비구독자"
+//                     }
+//                 })
+//             }
+//         } catch (err) {
+//             res.status(400).json({ result: false, errorMessage: "에러가 발생하였습니다." });
+//             return;
+//         }
 
+//     } else {
+//         try {
+//             const { postId } = req.params;
+//             const post = await Post.findOne({
+//                 where: { postId }
+//             })
+//             if (post === null) {
+//                 res.status(400).json({ result: false, errorMessage: "해당 게시물이 존재하지 않습니다.", });
+//                 return;
+//             } else {
+//                 const subs = post.channel
+//                 const existsubs = await Subs.findOne({ where: { channel: subs, userId: userId } })
+//                 if (existsubs) {
+//                     var subscribe = "구독자"
+//                 } else {
+//                     var subscribe = "비구독자"
+//                 }
+//                 res.status(200).json({
+//                     result: {
+//                         postId: post.postId,
+//                         title: post.title,
+//                         category: post.category,
+//                         discription: post.discription,
+//                         url: post.url,
+//                         like: post.like,
+//                         channel: post.channel,
+//                         userimage: post.userimage,
+//                         subscribe: subscribe
+//                     }
+//                 })
+//             }
+//         } catch (err) {
+//             res.status(400).json({ result: false, errorMessage: "에러가 발생하였습니다." });
+//             return;
+//         }
+
+//     }
+
+// });
+
+//게시물 조회
+router.get("/:postId", async (req, res) => {
+    const { postId } = req.params;
+    const post = await Post.findOne({
+        where: { postId }
+    })
+    if (post === null) {
+        res.status(400).json({ result: false, errorMessage: "해당 게시물이 존재하지 않습니다.", });
+        return;
     } else {
-        try {
-            const { postId } = req.params;
-            const post = await Post.findOne({
-                where: { postId }
-            })
-            if (post === null) {
-                res.status(400).json({ result: false, errorMessage: "해당 게시물이 존재하지 않습니다.", });
-                return;
-            } else {
-                const subs = post.channel
-                const existsubs = await Subs.findOne({ where: { channel: subs, userId: userId } })
-                if (existsubs) {
-                    var subscribe = "구독자"
-                } else {
-                    var subscribe = "비구독자"
-                }
-                res.status(200).json({
-                    result: {
-                        postId: post.postId,
-                        title: post.title,
-                        category: post.category,
-                        discription: post.discription,
-                        url: post.url,
-                        like: post.like,
-                        channel: post.channel,
-                        userimage: post.userimage,
-                        subscribe: subscribe
-                    }
-                })
+        res.status(200).json({
+            result: {
+                postId: post.postId,
+                title: post.title,
+                category: post.category,
+                discription: post.discription,
+                url: post.url,
+                like: post.like,
+                channel: post.channel,
+                userimage: post.userimage,
             }
-        } catch (err) {
-            res.status(400).json({ result: false, errorMessage: "에러가 발생하였습니다." });
-            return;
-        }
-
+        })
     }
 
-});
+})
+
 
 //게시물 수정  
 router.put("/:postId", authMiddlewares, async (req, res) => {

@@ -53,6 +53,7 @@ router.get("/scroll/:page", async (req, res) => {
     const totalPost = await Post.findAll();
     const count = totalPost.length;
     console.log("현재 저장된 게시물 수: ", count);
+    
     try {
         const pageData = await Post.findAll({ offset: start, limit: pageSize });
 
@@ -109,8 +110,8 @@ router.get("/search/:category", async (req, res) => {
 });
 
 //게시물 검색
-router.post("/searchkey", async (req, res) => {
-    const { keyword } = req.body;
+router.get("/searchkey/:keyword", async (req, res) => {
+    const { keyword } = req.params;
 
     const list = await Post.findAll({
         where: {
